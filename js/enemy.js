@@ -6,7 +6,7 @@ function spawnEnemies() {
         CONFIG.enemies.push({
           x: Math.random() * (CONFIG.canvas.width - 30),
           y: 0,
-          width: 55,
+          width: 57.5,
           height: 45,
           speed: (2 + Math.random() * 3) * CONFIG.enemySpeedMultiplier, // 增加初始速度
           // 随机选择预定义颜色或动态生成颜色

@@ -2,6 +2,29 @@
 let gameLoopId;
 let lastFrameTime = 0;
 
+function setupGameContainer() {
+  // 创建游戏容器
+  const gameContainer = document.createElement('div');
+  gameContainer.id = 'gameContainer';
+  gameContainer.style.position = 'absolute';
+  gameContainer.style.top = '0';
+  gameContainer.style.left = '0';
+  gameContainer.style.width = '100%';
+  gameContainer.style.height = '100%';
+  gameContainer.style.backgroundImage = "url('image/bgi_3.jpg')"; // 替换为你的背景图片路径
+  gameContainer.style.backgroundSize = 'cover'; // 确保图片覆盖整个背景
+  gameContainer.style.backgroundPosition = 'center'; // 居中显示背景图片
+  gameContainer.style.overflow = 'hidden'; // 防止内容溢出
+
+  // 将 canvas 添加到游戏容器中
+  CONFIG.canvas.style.position = 'relative'; // 确保 canvas 相对于容器定位
+  gameContainer.appendChild(CONFIG.canvas);
+
+  // 将游戏容器添加到 body
+  document.body.appendChild(gameContainer);
+}
+
+
 function gameLoop(timestamp) {
 
   const delta = timestamp - lastFrameTime;
@@ -12,11 +35,11 @@ function gameLoop(timestamp) {
   lastFrameTime = timestamp;
 
   if (CONFIG.isPaused) return; // 如果游戏暂停，则不执行游戏循环
-
+  CONFIG.ctx.clearRect(0, 0, CONFIG.canvas.width, CONFIG.canvas.height); // 清除画布
   // 绘制背景图片
   // const backgroundImage = new Image();
   // backgroundImage.src = 'image/gamebg.jpg';
-  CONFIG.ctx.drawImage(CONFIG.backgroundImage, 0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
+  //CONFIG.ctx.drawImage(CONFIG.backgroundImage, 0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
 
   // 绘制动态星空背景
   generateStars();
@@ -340,12 +363,16 @@ function showGameOver() {
   });
   CONFIG.gameOverOverlay.appendChild(restartButton);
 
-  const backgroundImage_game = new Image();
-  backgroundImage_game.src = 'image/bg2.jpg'; // 替换为你的游戏结束背景图片路径
+  //const backgroundImage_game = new Image();
+  //backgroundImage_game.src = 'image/bg2.jpg'; // 替换为你的游戏结束背景图片路径
   // 创建 Back 按钮
   const backButton = createBackButton(() => {
     CONFIG.gameOverOverlay.remove();
     CONFIG.gameOverOverlay = null; // 清除游戏结束界面引用
+    const gameContainer = document.getElementById('gameContainer');
+    if (gameContainer) {
+      gameContainer.remove();
+    } // 移除游戏容器
     showMainMenu(); // 返回主界面
   });
   CONFIG.gameOverOverlay.appendChild(backButton);
@@ -573,6 +600,7 @@ function showMainMenu() {
   mainMenuDiv.style.width = '100%';
   mainMenuDiv.style.height = '100%';
   mainMenuDiv.style.backgroundImage = "url('image/bgi_3.jpg')"; // 替换为你的背景图片路径
+  //mainMenuDiv.style.backgroundImage = `url('https://cdn.jsdelivr.net/gh/UIOSN/Pixel-Aero@main/image/bgi_3.jpg')`; // 使用选中的背景
   mainMenuDiv.style.backgroundSize = 'cover';
   mainMenuDiv.style.backgroundPosition = 'center';
   mainMenuDiv.style.display = 'flex';
@@ -711,12 +739,12 @@ mainMenuDiv.appendChild(settingsButton);
   const raindrops = [];
 
   // 初始化雨丝
-  for (let i = 0; i < 350; i++) {
+  for (let i = 0; i < 375; i++) {
     raindrops.push({
       x: Math.random() * rainCanvas.width, // 起始 x 坐标
       y: Math.random() * rainCanvas.height, // 起始 y 坐标
       length: Math.random() * 20 + 10, // 雨丝长度
-      speed: Math.random() * 4 + 8, // 雨丝速度
+      speed: Math.random() * 4 + 10, // 雨丝速度
       angle: Math.PI / 3, // 雨丝倾斜角度（45度）
     });
   }
@@ -1036,6 +1064,7 @@ function showDifficultySelection() {
       CONFIG.isPaused = false;
       CONFIG.isGameRunning = true; // 设置游戏状态为运行
       resetGame();
+      setupGameContainer(); // 创建游戏容器
       gameLoop();
     });
     difficultyDiv.appendChild(button);

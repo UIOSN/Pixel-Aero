@@ -8,7 +8,7 @@
 
 ---
 
-![alt text](showreadme-1.png)
+![alt text](showreadme.png)
 
 ## 🎮 游戏玩法
 

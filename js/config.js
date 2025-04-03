@@ -9,7 +9,7 @@ const CONFIG = {
       y: 0,
       width: 80,
       height: 80,
-      speed: 8,
+      speed: 10,
       image: new Image(),
     },
     bullets: [],

@@ -1,5 +1,7 @@
 // config.js
 const CONFIG = {
+    enemySpawnTimer: null,
+    lastEnemySpawnTime : 0, // 
     canvas: document.getElementById('gameCanvas'),
     ctx: document.getElementById('gameCanvas').getContext('2d'),
     player: {
@@ -7,7 +9,7 @@ const CONFIG = {
       y: 0,
       width: 80,
       height: 80,
-      speed: 15,
+      speed: 8,
       image: new Image(),
     },
     bullets: [],
@@ -19,7 +21,7 @@ const CONFIG = {
     gameOverOverlay: null,
     pauseOverlay: null,
     score: 0,
-    life: 3,
+    life: 5,
     difficulty: 'medium',
     highScores: JSON.parse(localStorage.getItem('highScores')) || [0, 0, 0],
     isPaused: false,
@@ -29,9 +31,10 @@ const CONFIG = {
     minEnemySpawnInterval: 300,
     bulletSound:new Audio('music/bullet.mp3'),
     explosionSound: new Audio('music/explosion_sound.mp3'),
-    bgMusic: new Audio('music/bgmusic_temp.mp3'),
+    bgMusic: new Audio('music/bgmusic_temp_cut.mp3'),
     homepageMusic: new Audio('music/homepage_music.mp3'),
     lastaccelerate_score: 0,
     isGameRunning: false,
+    lastrecover_time: 0,
   };
   

@@ -1,7 +1,10 @@
 function spawnEnemies() {
+  if(CONFIG.enemySpawnTimer) return;
+  if(CONFIG.isPaused) return; // 如果游戏暂停，停止生成敌人
+  //const currentTime = Date.now(); // 获取当前时间
     const brightColors = ['#00FFFF', '#FFD700', '#FFA500', '#ff0080', '#00BFFF',"#FF0000","#800080"]; //蓝色、黄色、橙色、粉色、深蓝色、红色、紫色
     // 生成随机颜色函数
-    setInterval(() => {
+    CONFIG.enemySpawnTimer = setInterval(() => {
       if (CONFIG.enemies.length < 2000) { // 限制敌人数量
         CONFIG.enemies.push({
           x: Math.random() * (CONFIG.canvas.width - 30),

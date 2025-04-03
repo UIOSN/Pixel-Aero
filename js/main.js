@@ -27,7 +27,28 @@ window.addEventListener('click', (e) => {
     CONFIG.bulletSound.volume = 0.3; // 设置音量
     CONFIG.bulletSound.play(); // 播放子弹音效
   });
+// window.addEventListener('contextmenu', (e) => {//特殊子弹发射
+//     CONFIG.specialBulletsLeft--; // 减少特殊子弹次数
+//     CONFIG.bullets.push({
+//       x: CONFIG.player.x + CONFIG.player.width / 2 - 180, // 调整子弹的 x 坐标
+//       y: CONFIG.player.y,
+//       width: 360, // 特殊子弹宽度是普通子弹的三倍
+//       height: 60, // 特殊子弹高度是普通子弹的三倍
+//       speed: 4,
+//       isSpecial: true, // 标记为特殊子弹
+//       color: brightColors[Math.floor(Math.random() * brightColors.length)] // 特殊子弹的光效颜色
+//     });
+//     CONFIG.bulletSound.currentTime = 0;
+//     CONFIG.bulletSound.play(); // 播放子弹音效
+//   });
 // 监听特殊子弹发射
+
+
+
+
+
+
+
 window.addEventListener('keydown', (e) => {
   // 如果按下的是 Shift 键，并且还有特殊子弹次数
   CONFIG.keys[e.key] = true; // 设置键盘状态为按下
@@ -46,7 +67,7 @@ window.addEventListener('keydown', (e) => {
     CONFIG.bulletSound.currentTime = 0;
     CONFIG.bulletSound.play(); // 播放子弹音效
   }
-  else if (e.code === 'Space') {
+  if (e.code === 'Space') {
     // 如果是 Game Over 界面，禁止触发暂停逻辑
     if (CONFIG.gameOverOverlay) {
     e.preventDefault(); // 禁止默认行为
@@ -62,8 +83,6 @@ window.addEventListener('keydown', (e) => {
 }
 });
 // 监听键盘事件
-// 定义在 CONFIG 中
-CONFIG.keys = {};
 // 设置全局光标样式
 document.body.style.cursor = "url('image/custom-cursor.png'), auto";
 CONFIG.player.image.src = 'image/plane.png'; // 玩家飞机图片
@@ -72,7 +91,7 @@ CONFIG.player.image.src = 'image/plane.png'; // 玩家飞机图片
 window.addEventListener('keyup', (e) => CONFIG.keys[e.key] = false);
 //CONFIG.player.image.src = 'image/rocket.png'; // 玩家飞机图片
 CONFIG.backgroundImage.src = 'image/bgi_33.jpg'; // 背景图片
-
+CONFIG.bgMusic.volume = 0.8
 
   
 

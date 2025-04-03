@@ -27,11 +27,18 @@ function setupGameContainer() {
 
 function gameLoop(timestamp) {
 
-  const delta = timestamp - lastFrameTime;
-  if (delta < 1000 / 90) { // 限制到 90 FPS
-    requestAnimationFrame(gameLoop);
-    return;
-  }
+  // // 检查键状态，防止卡住
+  // for (const key in CONFIG.keys) {
+  //   if (CONFIG.keys[key] && !isKeyCurrentlyPressed(key)) {
+  //     CONFIG.keys[key] = false; // 如果键未按下但状态为 true，重置为 false
+  //   }
+  // }
+
+  //const delta = timestamp - lastFrameTime;
+  // if (delta < 1000 / 90) { // 限制到 90 FPS
+  //   requestAnimationFrame(gameLoop);
+  //   return;
+  // }
   lastFrameTime = timestamp;
 
   if (CONFIG.isPaused) return; // 如果游戏暂停，则不执行游戏循环
@@ -40,7 +47,7 @@ function gameLoop(timestamp) {
   // const backgroundImage = new Image();
   // backgroundImage.src = 'image/gamebg.jpg';
   //CONFIG.ctx.drawImage(CONFIG.backgroundImage, 0, 0, CONFIG.canvas.width, CONFIG.canvas.height);
-
+  
   // 绘制动态星空背景
   generateStars();
   drawPlayer(CONFIG.ctx, CONFIG.player);// 绘制玩家飞机
@@ -96,6 +103,40 @@ function gameLoop(timestamp) {
   // 重置光效，避免影响其他绘制
   CONFIG.ctx.shadowColor = 'transparent';
   CONFIG.ctx.shadowBlur = 0;
+
+
+  //if (e.code === 'ShiftLeft' && CONFIG.specialBulletsLeft > 0) {
+//   if (CONFIG.keys['ShiftLeft'] && CONFIG.specialBulletsLeft > 0) { // 如果按下的是 Shift 键，并且还有特殊子弹次数
+//     //if(!CONFIG.keys[e.key]) CONFIG.keys[e.key] = true; // 设置键盘状态为按下
+//     CONFIG.specialBulletsLeft--; // 减少特殊子弹次数
+//     CONFIG.bullets.push({
+//       x: CONFIG.player.x + CONFIG.player.width / 2 - 180, // 调整子弹的 x 坐标
+//       y: CONFIG.player.y,
+//       width: 360, // 特殊子弹宽度是普通子弹的三倍
+//       height: 60, // 特殊子弹高度是普通子弹的三倍
+//       speed: 4,
+//       isSpecial: true, // 标记为特殊子弹
+//       color: brightColors[Math.floor(Math.random() * brightColors.length)] // 特殊子弹的光效颜色
+//     });
+//     CONFIG.bulletSound.currentTime = 0;
+//     CONFIG.bulletSound.play(); // 播放子弹音效
+//   }
+//   //else if (e.code === 'Space') {
+//   if (CONFIG.keys['Space']) { // 如果按下的是空格键
+//     // 如果是 Game Over 界面，禁止触发暂停逻辑
+//     if (CONFIG.gameOverOverlay) {
+//     e.preventDefault(); // 禁止默认行为
+//     return;
+//     }
+
+//     // 如果不是 Game Over 界面，处理暂停逻辑
+//     if (!CONFIG.isPaused) {
+//     pauseGame();
+//     } else {
+//     resumeGame();
+//     }
+// }
+
   // 玩家移动
   if (CONFIG.keys['a'] && CONFIG.player.x > 0) CONFIG.player.x -= CONFIG.player.speed;
   if (CONFIG.keys['d'] && CONFIG.player.x < CONFIG.canvas.width - CONFIG.player.width) CONFIG.player.x += CONFIG.player.speed;
@@ -199,7 +240,7 @@ CONFIG.enemies = CONFIG.enemies.filter(enemy => enemy.y < CONFIG.canvas.height);
         if(!bullet.isSpecial){CONFIG.bullets.splice(bIndex, 1);}// 删除子弹
         CONFIG.score += 10;
         CONFIG.explosionSound.currentTime = 0;
-        CONFIG.explosionSound.volume = 0.5;
+        CONFIG.explosionSound.volume = 0.3;
         CONFIG.explosionSound.play();
       }
     });
@@ -215,6 +256,8 @@ CONFIG.enemies = CONFIG.enemies.filter(enemy => enemy.y < CONFIG.canvas.height);
     ) {
       if (CONFIG.life > 0) {
         CONFIG.life--;
+        CONFIG.specialBulletsLeft++;
+        
         CONFIG.enemies.splice(eIndex, 1); // 删除敌人
         CONFIG.explosionSound.currentTime = 0;
         CONFIG.explosionSound.play();
@@ -225,12 +268,19 @@ CONFIG.enemies = CONFIG.enemies.filter(enemy => enemy.y < CONFIG.canvas.height);
     }
   });
   
-  if(CONFIG.score>0 && CONFIG.score%50==0 && CONFIG.score!=CONFIG.lastaccelerate_score) { // 每得 100 分加速一次
-    CONFIG.enemySpeedMultiplier+=0.05
-    if (CONFIG.enemySpawnInterval > 10)
-      { CONFIG.enemySpawnInterval-=50 ;
+  if(CONFIG.score>0 && CONFIG.score%300==0 && CONFIG.score!=CONFIG.lastaccelerate_score && CONFIG.enemySpeedMultiplier<=3) { // 每得 100 分加速一次
+    CONFIG.enemySpeedMultiplier+=0.07
+    
+    if (CONFIG.enemySpawnInterval >= 60)
+      { CONFIG.enemySpawnInterval-=20 ;
       }// 最小间隔为 200ms
     CONFIG.lastaccelerate_score=CONFIG.score; // 更新上次加速分数
+  }
+  if(CONFIG.score%150 ==0 &&CONFIG.score>0 &&  CONFIG.score!=CONFIG.lastrecover_score){
+    if(CONFIG.life<5) CONFIG.life+=1; // 每 300 分恢复 1 条命
+    CONFIG.specialBulletsLeft+=2; // 每 100 分增加 3 发特殊子弹
+    CONFIG.lastrecover_score=CONFIG.score; // 更新上次恢复分数
+
   }
   
     
@@ -279,7 +329,10 @@ function pauseGame() {
   pauseText.style.textShadow = '0 0 10px #ff0080, 0 0 20px #ff00ff, 0 0 30px #ff0080';
   //pauseText.style.textShadow = '0 0 10pxrgb(0, 225, 255), 0 0 20px #0ff';
   CONFIG.pauseOverlay.appendChild(pauseText);
-
+  if (CONFIG.enemySpawnTimer) {
+    clearInterval(CONFIG.enemySpawnTimer); // 停止敌人生成
+    CONFIG.enemySpawnTimer = null; // 清除定时器引用
+  }
   // 创建 Back 按钮
   const backButton = createBackButton(() => {
     CONFIG.pauseOverlay.remove();
@@ -296,8 +349,9 @@ function pauseGame() {
 function resumeGame() {
   if (!CONFIG.pauseOverlay) return; // 如果暂停界面不存在，则不执行恢复操作
 
-  CONFIG.isPaused = false;
+  CONFIG.isPaused = false; 
   CONFIG.pauseOverlay.remove(); // 移除暂停界面
+  spawnEnemies();
   CONFIG.pauseOverlay = null; // 清除暂停界面引用
   gameLoop(); // 继续游戏循环
 }
@@ -305,7 +359,10 @@ function resumeGame() {
 // 游戏结束界面
 function showGameOver() {
   if (CONFIG.gameOverOverlay) return; // 如果游戏结束界面已存在，则不重复创建
-
+  if (CONFIG.enemySpawnTimer) {
+    clearInterval(CONFIG.enemySpawnTimer); // 停止敌人生成
+    CONFIG.enemySpawnTimer = null; // 清除定时器引用
+  }
   cancelAnimationFrame(gameLoopId); // 停止游戏循环
   CONFIG.isPaused = true; // 确保游戏暂停
 
@@ -359,6 +416,7 @@ function showGameOver() {
     CONFIG.gameOverOverlay = null; // 清除游戏结束界面引用
     CONFIG.isGameRunning = true; // 设置游戏状态为运行
     resetGame(); // 重置游戏
+    spawnEnemies(); // 重新生成敌人
     gameLoop(); // 重新开始游戏
   });
   CONFIG.gameOverOverlay.appendChild(restartButton);
@@ -382,7 +440,7 @@ function showGameOver() {
 
 // 重置游戏
 function resetGame() {
-  CONFIG.life = 3; // 重置生命值
+  CONFIG.life = 5; // 重置生命值
   CONFIG.score = 0;
   CONFIG.bullets = [];
   CONFIG.specialBulletsLeft = 10; // 重置特殊子弹次数
@@ -397,6 +455,7 @@ function resetGame() {
 
   // 重置敌人速度和密度
   CONFIG.enemySpeedMultiplier = 1.2; // 重置速度倍率
+  CONFIG.enemySpawnInterval = CONFIG.difficulty === 'easy' ? 500 : CONFIG.difficulty === 'medium' ? 300 : 200;
 }
 
 // 修改游戏结束逻辑
@@ -467,18 +526,19 @@ function showSettingsMenu() {
   settingsDiv.appendChild(title);
 
 
-    // 作者信息
-  const authorInfo = document.createElement('p');
-  authorInfo.textContent = 'Author: minrb@mail2.sysu.edu.cn (COLLABORATION WELCOME !!)'; 
-  authorInfo.style.color = '#ffffff';
-  authorInfo.style.textShadow = '0 0 20px #ff0080, 0 0 40px #0ff';
-  authorInfo.style.fontFamily = 'Audiowide, sans-serif';
-  authorInfo.style.fontSize = '20px';
-  authorInfo.style.position = 'absolute'; // 设置为绝对定位
-  authorInfo.style.bottom = '10px'; // 距离底部 10px
-  authorInfo.style.left = '50%'; // 水平居中
-  authorInfo.style.transform = 'translateX(-50%)'; // 修正水平居中偏移
-  settingsDiv.appendChild(authorInfo);
+  //   // 作者信息
+  // const authorInfo = document.createElement('p');
+  // authorInfo.textContent = 'Author: minrb@mail2.sysu.edu.cn'; 
+  // authorInfo.style.fontSize = '30px';
+  // authorInfo.style.color = '#ffffff';
+  // authorInfo.style.textShadow = '0 0 20px #ff0080, 0 0 40px #0ff';
+  // authorInfo.style.fontFamily = 'Audiowide, sans-serif';
+  // //authorInfo.style.fontSize = '20px';
+  // authorInfo.style.position = 'absolute'; // 设置为绝对定位
+  // authorInfo.style.bottom = '20px'; // 距离底部 10px
+  // authorInfo.style.left = '50%'; // 水平居中
+  // authorInfo.style.transform = 'translateX(-50%)'; // 修正水平居中偏移
+  // settingsDiv.appendChild(authorInfo);
 
   // 创建 Reset High Scores 按钮
   const resetButton = document.createElement('button');
@@ -608,6 +668,21 @@ function showMainMenu() {
   mainMenuDiv.style.justifyContent = 'center';
   mainMenuDiv.style.alignItems = 'center';
   mainMenuDiv.style.textAlign = 'center';
+
+  // 作者信息
+  const authorInfo = document.createElement('p');
+  authorInfo.textContent = 'Author: minrb@mail2.sysu.edu.cn'; 
+  authorInfo.style.fontSize = '30px';
+  authorInfo.style.color = '#ffffff';
+  authorInfo.style.textShadow = '0 0 20px #ff0080, 0 0 40px #0ff';
+  authorInfo.style.fontFamily = 'Audiowide, sans-serif';
+  //authorInfo.style.fontSize = '20px';
+  authorInfo.style.position = 'absolute'; // 设置为绝对定位
+  authorInfo.style.bottom = '20px'; // 距离底部 10px
+  authorInfo.style.left = '50%'; // 水平居中
+  authorInfo.style.transform = 'translateX(-50%)'; // 修正水平居中偏移
+  mainMenuDiv.appendChild(authorInfo);
+
 
     // 创建背景雨丝的 canvas
   const rainCanvas = document.createElement('canvas');
@@ -739,12 +814,12 @@ mainMenuDiv.appendChild(settingsButton);
   const raindrops = [];
 
   // 初始化雨丝
-  for (let i = 0; i < 375; i++) {
+  for (let i = 0; i < 400; i++) {
     raindrops.push({
       x: Math.random() * rainCanvas.width, // 起始 x 坐标
       y: Math.random() * rainCanvas.height, // 起始 y 坐标
       length: Math.random() * 20 + 10, // 雨丝长度
-      speed: Math.random() * 4 + 10, // 雨丝速度
+      speed: Math.random() * 4 + 15, // 雨丝速度
       angle: Math.PI / 3, // 雨丝倾斜角度（45度）
     });
   }
@@ -937,14 +1012,14 @@ function showDifficultySelection() {
   tutorialDiv.style.transform = 'translateY(-50%)'; // 修正垂直居中偏移
   tutorialDiv.style.color = '#ffffff';
   tutorialDiv.style.fontFamily = 'Audiowide, sans-serif';
-  tutorialDiv.style.fontSize = '18px';
+  tutorialDiv.style.fontSize = '25px';
   tutorialDiv.style.textAlign = 'left'; // 左对齐
   tutorialDiv.style.lineHeight = '1.8'; // 行间距
   tutorialDiv.style.textShadow = '0 0 10px #ff0080, 0 0 20px #0ff'; // 添加霓虹效果
 
   // 添加教学内容
   tutorialDiv.innerHTML = `
-    <h2 style="margin-bottom: 10px; text-shadow: 0 0 20px #ff0080;">How to play</h2>
+    <h2 style="margin-bottom: 20px; text-shadow: 0 0 20px #ff0080;">How to play?</h2>
     <p>🕹️ <b>WASD</b>: Move</p>
     <p>🖱️ <b>Click</b>: Shoot</p>
     <p>⏸️ <b>Space</b>: Pause</p>
@@ -1054,16 +1129,18 @@ function showDifficultySelection() {
     });
     button.addEventListener('click', () => {
       CONFIG.difficulty = level.toLowerCase();
-      CONFIG.enemySpawnInterval = CONFIG.difficulty === 'easy' ? 800 : CONFIG.difficulty === 'medium' ? 200 : 200;
+      CONFIG.enemySpawnInterval = CONFIG.difficulty === 'easy' ? 500 : CONFIG.difficulty === 'medium' ? 300 : 200;
       difficultyDiv.remove();
-      CONFIG.enemySpeedMultiplier = CONFIG.difficulty === 'easy' ? 1 : CONFIG.difficulty === 'medium' ? 2 : 2;
+      //CONFIG.enemySpeedMultiplier = CONFIG.difficulty === 'easy' ? 1 : CONFIG.difficulty === 'medium' ? 1.2 : 2;
       CONFIG.homepageMusic.pause(); // 暂停主页音乐
       CONFIG.homepageMusic.currentTime = 0; // 重置主页音乐
+      
       CONFIG.bgMusic.play();
-      spawnEnemies();
-      CONFIG.isPaused = false;
+      
+      //CONFIG.isPaused = false;
       CONFIG.isGameRunning = true; // 设置游戏状态为运行
       resetGame();
+      spawnEnemies();
       setupGameContainer(); // 创建游戏容器
       gameLoop();
     });
@@ -1104,6 +1181,8 @@ function showDifficultySelection() {
 }
 function showStartScreen() {
   // 创建开始界面容器
+  CONFIG.bgMusic.pause(); // 暂停背景音乐
+  CONFIG.bgMusic.currentTime = 0; // 重置背景音乐
   const startScreenDiv = document.createElement('div');
   startScreenDiv.style.position = 'absolute';
   startScreenDiv.style.top = '0';

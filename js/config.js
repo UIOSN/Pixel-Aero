@@ -31,10 +31,24 @@ const CONFIG = {
     minEnemySpawnInterval: 300,
     bulletSound:new Audio('music/bullet.mp3'),
     explosionSound: new Audio('music/explosion_sound.mp3'),
-    bgMusic: new Audio('music/bgmusic_temp_cut.mp3'),
-    homepageMusic: new Audio('music/homepage_music.mp3'),
+    // bgMusic: new Audio('music/bgmusic_temp_cut.mp3'),
+    //homepageMusic: new Audio('music/homepage_music.mp3'),
     lastaccelerate_score: 0,
     isGameRunning: false,
     lastrecover_time: 0,
+    homepageMusicList: [
+      new Audio('music/homepage_music.mp3'),
+      new Audio('music/night.mp3'),
+      new Audio('music/monster.mp3'),
+    ],
+    bgMusicList: [
+      new Audio('music/bgmusic_new.mp3'),
+      new Audio('music/bgmusic_mini.mp3'),
+      new Audio('music/bgmusic_temp_cut.mp3'),
+    ],
+    homepageMusic: null,
+    bgMusic: null,
+    bgMusicIndex: null,
+    homepageMusicIndex: null,
   };
   

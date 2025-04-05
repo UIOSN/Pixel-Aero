@@ -337,6 +337,10 @@ function pauseGame() {
   const backButton = createBackButton(() => {
     CONFIG.pauseOverlay.remove();
     CONFIG.pauseOverlay = null; // 清除暂停界面引用
+    // 
+    CONFIG.homepageMusicIndex = (CONFIG.homepageMusicIndex+1)%3;
+    CONFIG.homepageMusic = CONFIG.homepageMusicList[CONFIG.homepageMusicIndex]; // 随机选择背景音乐
+    CONFIG.homepageMusic.currentTime = 0; // 重置音乐播放时间
     showMainMenu(); // 返回主界面
 
   });
@@ -431,6 +435,10 @@ function showGameOver() {
     if (gameContainer) {
       gameContainer.remove();
     } // 移除游戏容器
+    // 
+    CONFIG.homepageMusicIndex = (CONFIG.homepageMusicIndex+1)%3;
+    CONFIG.homepageMusic = CONFIG.homepageMusicList[CONFIG.homepageMusicIndex]; // 随机选择背景音乐
+    CONFIG.homepageMusic.currentTime = 0; // 重置音乐播放时间
     showMainMenu(); // 返回主界面
   });
   CONFIG.gameOverOverlay.appendChild(backButton);
@@ -448,6 +456,15 @@ function resetGame() {
   CONFIG.backgroundStars = [];
   createStars(); // 重新生成背景星星
   CONFIG.isPaused = false; // 确保游戏不是暂停状态
+  // randomIndex = Math.floor(Math.random() * 3); // 生成 0, 1, 2 中的随机数
+  CONFIG.bgMusicIndex = (CONFIG.bgMusicIndex+1)%3;
+  if (CONFIG.bgMusic) {
+    CONFIG.bgMusic.pause(); // 暂停当前背景音乐
+  }
+  CONFIG.bgMusic = CONFIG.bgMusicList[CONFIG.bgMusicIndex]; // 随机选择背景音乐
+  if(CONFIG.bgMusicIndex==0) CONFIG.bgMusic.volume = 0.5;
+  else CONFIG.bgMusic.volume = 0.9; // 设置音量
+  CONFIG.bgMusic.loop = true; // 循环播放
   CONFIG.bgMusic.currentTime = 0; // 重置背景音乐
   CONFIG.player.x = CONFIG.canvas.width / 2 - 15; // 重置玩家位置
   CONFIG.player.y = CONFIG.canvas.height - 60;
@@ -647,11 +664,28 @@ function showSettingsMenu() {
   document.body.appendChild(settingsDiv);
 }
 function showMainMenu() {
+  if (CONFIG.bgMusic) {
+    CONFIG.bgMusic.pause(); // 暂停之前的背景音乐
+    CONFIG.bgMusic.currentTime = 0; // 重置播放时间
+  }
+  if (CONFIG.homepageMusic==null){
+  // randomIndex = Math.floor(Math.random() * 3); // 生成 0, 1, 2 中的随机数
+  CONFIG.homepageMusicIndex = (CONFIG.homepageMusicIndex+1)%3;
+  CONFIG.homepageMusic = CONFIG.homepageMusicList[CONFIG.homepageMusicIndex]; // 随机选择背景音乐
   
+}
   CONFIG.isGameRunning = false; // 设置游戏状态为未运行
-  // 创建主界面容器
-  CONFIG.bgMusic.pause(); // 暂停背景音乐
-  CONFIG.bgMusic.currentTime = 0; // 重置背景音乐
+  CONFIG.homepageMusic.volume = 1; // 设置音量
+  CONFIG.homepageMusic.loop = true; // 循环播放
+  //CONFIG.homepageMusic.currentTime = 0; // 重置音乐播放时间
+
+
+  // CONFIG.bgMusic = CONFIG.bgMusicList[randomIndex]; // 随机选择背景音乐
+  // CONFIG.bgMusic.volume = 0.8; // 设置音量
+  // CONFIG.bgMusic.pause(); // 暂停音乐
+  // CONFIG.bgMusic.loop = true; // 循环播放
+
+
   CONFIG.homepageMusic.play(); // 播放主页音乐
   const mainMenuDiv = document.createElement('div');
   mainMenuDiv.style.position = 'absolute';
@@ -1135,7 +1169,7 @@ function showDifficultySelection() {
       CONFIG.homepageMusic.pause(); // 暂停主页音乐
       CONFIG.homepageMusic.currentTime = 0; // 重置主页音乐
       
-      CONFIG.bgMusic.play();
+      //CONFIG.bgMusic.play();
       
       //CONFIG.isPaused = false;
       CONFIG.isGameRunning = true; // 设置游戏状态为运行
@@ -1181,8 +1215,8 @@ function showDifficultySelection() {
 }
 function showStartScreen() {
   // 创建开始界面容器
-  CONFIG.bgMusic.pause(); // 暂停背景音乐
-  CONFIG.bgMusic.currentTime = 0; // 重置背景音乐
+  if(CONFIG.bgMusic) CONFIG.bgMusic.pause(); // 暂停背景音乐
+  
   const startScreenDiv = document.createElement('div');
   startScreenDiv.style.position = 'absolute';
   startScreenDiv.style.top = '0';

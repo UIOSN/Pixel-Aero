@@ -10,13 +10,13 @@ window.addEventListener('resize', resizeCanvas);
 createStars();
 
 
-CONFIG.bgMusic.autoplay = true; // 自动播放
-CONFIG.bgMusic.loop = true; // 循环播放
-CONFIG.bgMusic.volume = 1; // 设置音量
+// CONFIG.bgMusic.autoplay = true; // 自动播放
+// CONFIG.bgMusic.loop = true; // 循环播放
+// CONFIG.bgMusic.volume = 1; // 设置音量
 
-CONFIG.homepageMusic.autoplay = true;
-CONFIG.homepageMusic.loop = true;
-CONFIG.homepageMusic.volume = 1;
+// CONFIG.homepageMusic.autoplay = true;
+// CONFIG.homepageMusic.loop = true;
+// CONFIG.homepageMusic.volume = 1;
 //const brightColors = ['#00FFFF', '#FFD700', '#FFA500', '#ff0080', '#00BFFF',"#FF0000","#800080"]; //蓝色、黄色、橙色、粉色、深蓝色、红色、紫色
 
 // 点击特效
@@ -91,8 +91,9 @@ CONFIG.player.image.src = 'image/plane.png'; // 玩家飞机图片
 window.addEventListener('keyup', (e) => CONFIG.keys[e.key] = false);
 //CONFIG.player.image.src = 'image/rocket.png'; // 玩家飞机图片
 CONFIG.backgroundImage.src = 'image/bgi_33.jpg'; // 背景图片
-CONFIG.bgMusic.volume = 0.8
-
+// CONFIG.bgMusic.volume = 0.8
+CONFIG.bgMusicIndex = Math.floor(Math.random() * CONFIG.bgMusicList.length); // 随机选择背景音乐
+CONFIG.homepageMusicIndex = Math.floor(Math.random() * CONFIG.homepageMusicList.length); // 随机选择主页音乐
   
 
 // 显示主界面
